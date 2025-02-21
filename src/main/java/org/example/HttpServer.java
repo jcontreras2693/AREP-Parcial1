@@ -51,7 +51,7 @@ public class HttpServer {
 
             if (path.startsWith("/compreflex")){
                 outputLine = "HTTP/1.1 200 OK\r\n"
-                        + "Content-Type: text/html\r\n"
+                        + "Content-Type: application/json\r\n"
                         + "\r\n"
                         + extractComando(path);
             } else {
@@ -66,6 +66,7 @@ public class HttpServer {
                         + "</head>\n"
                         + "<body>\n"
                         + "<h1>Mi propio mensaje</h1>\n"
+                        + "<h1>{\"name\":\"John\"}</h1>\n"
                         + "</body>\n"
                         + "</html>\n";
             }
@@ -87,26 +88,26 @@ public class HttpServer {
 
         if (comando.startsWith("bbl")){
             String[] params = comando.split("\\(")[1].split("\\)")[0].split(",");
-            return bubbleSort(params);
+
+            return "{\"respuesta\":" + bubbleSort(params) + "}";
         }
 
         String methodString = comando.split("\\(")[0];
         String[] params = comando.split("\\(")[1].split("\\)")[0].split(",");
 
-//        System.out.println("Number of params: " + params.length);
-//        for (int i = 0; i < params.length; i++){
-//            System.out.println("Param: " + params[i]);
-//        }
-
         if (params.length == 1){
             Method m = c.getMethod(methodString, double.class);
             response = m.invoke(null, getParamValue(params[0])).toString();
+
+            return "{\"respuesta\":\"" + response + "\"}";
         } else if (params.length == 2){
             Method m = c.getMethod(methodString, double.class, double.class);
             response = m.invoke(null, getParamValue(params[0]), getParamValue(params[1])).toString();
-        }
 
-        return response;
+            return "{\"respuesta\":\"" + response + "\"}";
+        } else {
+            return "Only 1 and 2 parameters methods are available";
+        }
     }
 
     private static Double getParamValue(String param) {
@@ -120,8 +121,6 @@ public class HttpServer {
         for (int i = 0; i < n; i++) {
             numbers[i] = Integer.valueOf(params[i]);
         }
-        //System.out.println("Numbers Before: " + Arrays.toString(numbers));
-
         for (int i = 0; i < n - 1; i++) {
             for (int j = 0; j < n - i - 1; j++) {
                 if (numbers[j] > numbers[j + 1]) {
@@ -131,7 +130,6 @@ public class HttpServer {
                 }
             }
         }
-        //System.out.println("Numbers After: " + Arrays.toString(numbers));
 
         return Arrays.toString(numbers);
     }
